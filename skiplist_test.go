@@ -2,6 +2,7 @@ package skiplist
 
 import (
 	"github.com/stretchr/testify/require"
+	"math/rand/v2"
 	"testing"
 )
 
@@ -58,4 +59,43 @@ func Test_randomLevel(t *testing.T) {
 			require.Equal(t, tc.expectedLevel, level)
 		})
 	}
+}
+
+type IntKey int
+
+func (m IntKey) LessThan(k IntKey) bool {
+	return m < k
+}
+
+func (m IntKey) Equal(k IntKey) bool {
+	return m == k
+}
+
+func TestList_Insert(t *testing.T) {
+	keys := []IntKey{1, 2, 3, 4}
+	values := []string{"test1", "test2", "test3", "test4"}
+
+	list := New[IntKey](rand.New(rand.NewPCG(rand.Uint64(), rand.Uint64())), 0.5)
+
+	for i := range keys {
+		list.Insert(keys[i], values[i])
+	}
+}
+
+func TestList_Search(t *testing.T) {
+	keys := []IntKey{1, 2, 3, 4}
+	values := []string{"test1", "test2", "test3", "test4"}
+
+	list := New[IntKey](rand.New(rand.NewPCG(rand.Uint64(), rand.Uint64())), 0.5)
+
+	for i := range keys {
+		list.Insert(keys[i], values[i])
+	}
+
+	res, err := list.Search(IntKey(3))
+	require.NoError(t, err)
+	require.Equal(t, res.Value, "test3")
+
+	res, err = list.Search(IntKey(9))
+	require.Error(t, err)
 }
